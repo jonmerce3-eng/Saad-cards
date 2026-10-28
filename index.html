@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        try {
+          var originalFetch = window.fetch ? window.fetch.bind(window) : undefined;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function () {
+              return originalFetch;
+            },
+            set: function (newFetch) {
+              originalFetch = newFetch;
+            },
+          });
+        } catch (err) {
+          // Ignore if environment locks Object.defineProperty
+        }
+        window.addEventListener(
+          'error',
+          function (event) {
+            if (
+              (event.filename && event.filename.indexOf('chrome-extension://') === 0) ||
+              (event.message && event.message.indexOf('Cannot set property fetch') !== -1)
+            ) {
+              event.stopImmediatePropagation();
+              event.preventDefault();
+            }
+          },
+          true
+        );
+      })();
+    </script>
+    <title>Prepress Master Automation Studio</title>
+    <meta name="description" content="منظومة أتمتة المونتاج الطباعي وسير عمل التليجرام مع n8n وسيرفر بايثون" />
+    <meta property="og:title" content="Prepress Master Automation Studio" />
+    <meta property="og:description" content="منظومة أتمتة المونتاج الطباعي وسير عمل التليجرام مع n8n وسيرفر بايثون" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

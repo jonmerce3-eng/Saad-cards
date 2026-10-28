@@ -1,0 +1,532 @@
+{
+  "name": "Prepress Master Automation v3 (Auto-Detect & Interactive)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "003bc15c-7e66-42ad-b152-5b100da257b7",
+      "name": "1. Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        848,
+        368
+      ],
+      "webhookId": "4aee2cc5-7bd7-4cbd-a1ec-c363e99c8196",
+      "credentials": {
+        "telegramApi": {
+          "id": "lus2Ev9B6cSdAsaN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-is-doc",
+              "leftValue": "={{ $json.message?.document?.file_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6d7108bc-5890-4d00-b970-d4042629ac69",
+      "name": "2. Route: New PDF or Button Click?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.document.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "0163e29b-b382-41e9-ac6a-196ff8bdacc0",
+      "name": "3. Download Telegram File",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        208
+      ],
+      "webhookId": "2f279e05-8be1-4ba4-8cf1-71240dfd38e4",
+      "credentials": {
+        "telegramApi": {
+          "id": "lus2Ev9B6cSdAsaN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hoqvi-156-215-77-76.run.pinggy-free.link/inspect-pdf",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "chat_id",
+              "value": "={{ $('1. Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "892ba2b7-07fc-4afd-a72b-39577fa71744",
+      "name": "4. Inspect & Cache PDF in Python",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1600,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-exact-95x60",
+              "leftValue": "={{ $json.size_status }}",
+              "rightValue": "exact_95x60",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "649934f8-480d-4b53-b0a6-d08d070ca0b2",
+      "name": "5. Is Exact 95x60mm?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.report_message }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✅ نعم - مونتاج كارت (48.6×33 سم)",
+                    "additionalFields": {
+                      "callback_data": "card_486x330"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "📐 مونتاج كارت (فرخ 50×35 سم)",
+                    "additionalFields": {
+                      "callback_data": "card_350x500"
+                    }
+                  },
+                  {
+                    "text": "📄 ليس كارت (وضع في منتصف الفرخ)",
+                    "additionalFields": {
+                      "callback_data": "sheet_center"
+                    }
+                  },
+                  {
+                    "text": "❌ إلغاء العملية",
+                    "additionalFields": {
+                      "callback_data": "cancel_job"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "94922ddd-8cdf-46af-9906-f6910ad6ecb0",
+      "name": "6. Send Interactive Choices",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        2096,
+        304
+      ],
+      "webhookId": "056910e4-b249-406c-835e-c67c4e6f699f",
+      "credentials": {
+        "telegramApi": {
+          "id": "lus2Ev9B6cSdAsaN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "⚡ *مقاس الكارت مضبوط تلقائياً (95×60 مم شامل 2.5 مم بليد)!*\nجاري عمل المونتاج ورسم السينيوهات وتجهيز ملفات الطباعة والبروفة فوراً...",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "5de51bc6-2490-428a-8051-ceaa7d0e631a",
+      "name": "7. Notify Auto-Start (95x60)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        2096,
+        80
+      ],
+      "webhookId": "ca487ad4-77b5-471b-aa55-50ebd0176154",
+      "credentials": {
+        "telegramApi": {
+          "id": "lus2Ev9B6cSdAsaN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-not-cancel",
+              "leftValue": "={{ $json.callback_query?.data }}",
+              "rightValue": "cancel_job",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c31f8512-3da6-4e34-9f86-ca7b7cd150f4",
+      "name": "8. Check Button Action",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hoqvi-156-215-77-76.run.pinggy-free.link/impose-cached",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $('1. Telegram Trigger').item.json.message?.chat?.id || $('1. Telegram Trigger').item.json.callback_query?.message?.chat?.id }}"
+            },
+            {
+              "name": "mode",
+              "value": "={{ $('1. Telegram Trigger').item.json.callback_query?.data || 'card_486x330' }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "1b5381fb-e0c7-4989-bf1a-f0727639d937",
+      "name": "9. Execute Imposition in Python",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2368,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const printB64 = $input.item.json.print_file_b64;\nconst proofB64 = $input.item.json.proof_file_b64;\nconst originalName = $input.item.json.filename || 'Job.pdf';\nconst baseName = originalName.replace(/\\.pdf$/i, '');\n\nreturn {\n  json: {\n    status: $input.item.json.status,\n    job_name: baseName,\n    pages_imposed: $input.item.json.pages_imposed,\n    sheet_size: $input.item.json.sheet_size,\n    chat_id: $('1. Telegram Trigger').item.json.message?.chat?.id || $('1. Telegram Trigger').item.json.callback_query?.message?.chat?.id\n  },\n  binary: {\n    print_pdf: await this.helpers.prepareBinaryData(\n      Buffer.from(printB64, 'base64'),\n      `${baseName}_PRINT_CMYK.pdf`,\n      'application/pdf'\n    ),\n    proof_pdf: await this.helpers.prepareBinaryData(\n      Buffer.from(proofB64, 'base64'),\n      `${baseName}_CLIENT_PROOF.pdf`,\n      'application/pdf'\n    )\n  }\n};"
+      },
+      "id": "5814cd24-c36c-4f13-93b6-2231b62f0608",
+      "name": "10. Decode Print & Proof PDFs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2608,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.chat_id }}",
+        "binaryData": true,
+        "binaryPropertyName": "proof_pdf",
+        "additionalFields": {
+          "caption": "={{ '👁‍🗨 ملف البروفة (مع السينيوهات الخارجية): ' + $json.job_name + '\\n📐 مقاس الفرخ: ' + $json.sheet_size + ' | صافي القص: 90×55 مم | البليد: 2.5 مم' }}"
+        }
+      },
+      "id": "877b3249-4980-4ddd-8d2d-58b5e6b89a65",
+      "name": "11. Send Proof PDF",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        2848,
+        320
+      ],
+      "webhookId": "8e33e297-99f8-44b1-9b9c-a657234c223c",
+      "credentials": {
+        "telegramApi": {
+          "id": "lus2Ev9B6cSdAsaN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $json.chat_id }}",
+        "binaryData": true,
+        "binaryPropertyName": "print_pdf",
+        "additionalFields": {
+          "caption": "={{ '🖨 ملف الطباعة الجاهز للزنكات (CMYK + Registration Marks): ' + $json.job_name }}"
+        }
+      },
+      "id": "2dd6d2a1-167f-415d-b72f-2a71712808a4",
+      "name": "12. Send Print-Ready CMYK PDF",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        2848,
+        528
+      ],
+      "webhookId": "ff67a912-39e6-42f7-95c9-8417e968cd79",
+      "credentials": {
+        "telegramApi": {
+          "id": "lus2Ev9B6cSdAsaN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('1. Telegram Trigger').item.json.callback_query.message.chat.id }}",
+        "text": "❌ تم إلغاء عملية المونتاج لهذا الملف بنجاح.",
+        "additionalFields": {}
+      },
+      "id": "d73ec3b5-ff55-4078-b11c-88dbd783d428",
+      "name": "13. Notify Cancelled",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        1632,
+        672
+      ],
+      "webhookId": "c9af7b19-4934-46f1-8112-90f489ff1ade",
+      "credentials": {
+        "telegramApi": {
+          "id": "lus2Ev9B6cSdAsaN",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "1. Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "2. Route: New PDF or Button Click?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Route: New PDF or Button Click?": {
+      "main": [
+        [
+          {
+            "node": "3. Download Telegram File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "8. Check Button Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Download Telegram File": {
+      "main": [
+        [
+          {
+            "node": "4. Inspect & Cache PDF in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Inspect & Cache PDF in Python": {
+      "main": [
+        [
+          {
+            "node": "5. Is Exact 95x60mm?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Is Exact 95x60mm?": {
+      "main": [
+        [
+          {
+            "node": "7. Notify Auto-Start (95x60)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "6. Send Interactive Choices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "7. Notify Auto-Start (95x60)": {
+      "main": [
+        [
+          {
+            "node": "9. Execute Imposition in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "8. Check Button Action": {
+      "main": [
+        [
+          {
+            "node": "9. Execute Imposition in Python",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "13. Notify Cancelled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "9. Execute Imposition in Python": {
+      "main": [
+        [
+          {
+            "node": "10. Decode Print & Proof PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10. Decode Print & Proof PDFs": {
+      "main": [
+        [
+          {
+            "node": "11. Send Proof PDF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "12. Send Print-Ready CMYK PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a34e7cb1-2d36-48b4-aabd-b6a968a862c8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6fa130fc6a761c51bebb669ac58631ae7c87209f76fce5f16d2a67485cfb607"
+  },
+  "nodeGroups": [],
+  "id": "MpeU4lmrsYvYQJqn",
+  "tags": []
+}
