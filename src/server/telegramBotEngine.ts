@@ -81,7 +81,7 @@ class TelegramBotManager {
   private logs: ActivityLogEntry[] = [];
 
   constructor() {
-    this.loadSavedConfig();
+    // Do not auto-start polling on module import (prevents unit tests from hanging or competing with server)
   }
 
   public addLog(type: ActivityLogEntry['type'], message: string) {
@@ -94,7 +94,7 @@ class TelegramBotManager {
     this.logs = [entry, ...this.logs.slice(0, 49)];
   }
 
-  private loadSavedConfig() {
+  public initFromSavedConfig() {
     const envToken = process.env.TELEGRAM_BOT_TOKEN?.trim();
     if (envToken) {
       this.connectBot(envToken).catch(() => {});

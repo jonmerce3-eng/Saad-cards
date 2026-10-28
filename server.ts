@@ -6,10 +6,25 @@ import { telegramBotManager } from './src/server/telegramBotEngine';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+  // Auto-connect saved Telegram bot token on server startup
+  telegramBotManager.initFromSavedConfig();
+
+  // 0. Health Check Endpoint (for Render / Koyeb / UptimeRobot 24/7 Keep-Alive)
+  app.get('/api/health', (_req, res) => {
+    const status = telegramBotManager.getStatus();
+    res.json({
+      ok: true,
+      service: 'prepress-cloud-studio',
+      botConnected: status.connected,
+      botUsername: status.botInfo?.username || null,
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   // 1. Get Telegram Bot Live Status, Jobs, and Logs
   app.get('/api/telegram/status', (_req, res) => {

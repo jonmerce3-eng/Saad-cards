@@ -1160,9 +1160,77 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 3: SYSTEM COMPARISON & PREPRESS GUIDE */}
+        {/* TAB 3: FREE DEPLOYMENT & SYSTEM GUIDE */}
         {activeTab === 'guide' && (
           <div className="space-y-6">
+            {/* Step-by-Step Free Cloud Hosting Guide */}
+            <div className="rounded-2xl border border-cyan-800/50 bg-slate-900/70 p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                  <h2 className="font-bold text-white text-base">
+                    🚀 خطوات رفع وتشغيل النظام مجاناً مدى الحياة (GitHub + Render / Koyeb)
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    تم تجهيز المشروع بملفي <code className="text-cyan-300 font-mono">render.yaml</code> و <code className="text-cyan-300 font-mono">Dockerfile</code> ونقطة فحص <code className="text-emerald-400 font-mono">/api/health</code> ليعمل مجاناً 24/7.
+                  </p>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  100% Free Hosting Ready
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                {/* Step 1 */}
+                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">
+                    الخطوة 1: رفع الكود على GitHub
+                  </span>
+                  <p className="text-slate-300 leading-relaxed">
+                    من أعلى يمين شاشة Google AI Studio، اضغط على أيقونة <strong>GitHub / Export to GitHub</strong> (أو قم بتحميل المشروع ZIP ورفعه إلى مستودع GitHub جديد خاص بك).
+                  </p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">
+                    الخطوة 2: الربط المجاني على Render.com أو Koyeb
+                  </span>
+                  <p className="text-slate-300 leading-relaxed">
+                    افتح موقع <strong>render.com</strong> (أو <strong>koyeb.com</strong>) وسجل دخولك بحساب GitHub، ثم اختر <strong>New Web Service</strong> واختر المستودع، وحدد الخطة المجانية <strong>Free Plan ($0/month)</strong>.
+                  </p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                    الخطوة 3: أوامر التشغيل ومتغير التوكن (Environment Variable)
+                  </span>
+                  <div className="space-y-1.5 font-mono text-[11px] bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-slate-200" dir="ltr">
+                    <div><span className="text-slate-500">Build Command:</span> npm install && npm run build</div>
+                    <div><span className="text-slate-500">Start Command:</span> npm run start</div>
+                    <div><span className="text-emerald-400">Env Var Key:</span> TELEGRAM_BOT_TOKEN</div>
+                    <div><span className="text-emerald-400">Env Var Value:</span> (ضع توكن بوت التليجرام هنا)</div>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    وضع <code className="text-emerald-300">TELEGRAM_BOT_TOKEN</code> في الـ Environment Variables يجعل البوت يتصل تلقائياً فور تشغيل السيرفر دون الحاجة لإدخاله يدوياً!
+                  </p>
+                </div>
+
+                {/* Step 4 */}
+                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">
+                    الخطوة 4: إبقاء السيرفر المجاني مستيقظاً 24/7 (Keep-Alive)
+                  </span>
+                  <p className="text-slate-300 leading-relaxed">
+                    الخطط المجانية على Render تنام بعد 15 دقيقة من عدم الاستخدام. لإبقائها مستيقظة 24 ساعة مجاناً، سجل في موقع <strong>cron-job.org</strong> أو <strong>UptimeRobot.com</strong> (مجاني) وأضف رابط فحص السيرفر كل 10 دقائق:
+                  </p>
+                  <div className="font-mono text-[11px] bg-slate-900 p-2 rounded border border-slate-800 text-cyan-300" dir="ltr">
+                    https://your-app-name.onrender.com/api/health
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               
               <div className="rounded-2xl border border-rose-900/40 bg-slate-900/60 p-5 space-y-3">
